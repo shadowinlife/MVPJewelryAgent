@@ -1,0 +1,97 @@
+{
+  "tiers": [
+    {
+      "key": "free",
+      "name": "免费体验",
+      "priceHint": "免费",
+      "monthlyTokens": 20000,
+      "monthlyReportQuota": 3,
+      "visibleFields": ["materialHint", "risk", "needReinspect"],
+      "summary": "查看材质倾向 + 风险等级 + 是否建议复检。",
+      "quotaHint": "每月 2 万 Token / 约 3 份 Mock 报告"
+    },
+    {
+      "key": "basic",
+      "name": "基础会员",
+      "priceHint": "联系管理员开通",
+      "monthlyTokens": 100000,
+      "monthlyReportQuota": 15,
+      "visibleFields": ["materialHint", "risk", "needReinspect", "priceRange", "liquidity"],
+      "summary": "新增价格区间 + 流通性判断。",
+      "quotaHint": "每月 10 万 Token / 约 15 份报告"
+    },
+    {
+      "key": "pro",
+      "name": "进阶会员",
+      "priceHint": "联系管理员开通",
+      "monthlyTokens": 300000,
+      "monthlyReportQuota": 50,
+      "visibleFields": [
+        "materialHint",
+        "risk",
+        "needReinspect",
+        "priceRange",
+        "liquidity",
+        "recyclePrice",
+        "fullRisk"
+      ],
+      "summary": "新增即时回收价 + 完整风险分析。",
+      "quotaHint": "每月 30 万 Token / 约 50 份报告"
+    },
+    {
+      "key": "business",
+      "name": "商家会员",
+      "priceHint": "联系管理员开通",
+      "monthlyTokens": 800000,
+      "monthlyReportQuota": 150,
+      "visibleFields": [
+        "materialHint",
+        "risk",
+        "needReinspect",
+        "priceRange",
+        "liquidity",
+        "recyclePrice",
+        "fullRisk",
+        "negotiationStrategy",
+        "auctionCeiling",
+        "channelHint"
+      ],
+      "summary": "新增压价策略 + 法拍上限 + 渠道判断。",
+      "quotaHint": "每月 80 万 Token / 约 150 份报告"
+    },
+    {
+      "key": "business_pro",
+      "name": "商家高级",
+      "priceHint": "联系管理员开通",
+      "monthlyTokens": 2000000,
+      "monthlyReportQuota": 400,
+      "visibleFields": [
+        "materialHint",
+        "risk",
+        "needReinspect",
+        "priceRange",
+        "liquidity",
+        "recyclePrice",
+        "fullRisk",
+        "negotiationStrategy",
+        "auctionCeiling",
+        "channelHint",
+        "similarCases",
+        "batchHint"
+      ],
+      "summary": "新增批量分析入口 + 内部相似案例。",
+      "quotaHint": "每月 200 万 Token / 约 400 份报告"
+    }
+  ],
+  "lockedCardCopy": {
+    "title": "价格带与回收价为高级内容",
+    "description": "升级后可查看合理入手价、流通成交价、即时回收价和转售建议。",
+    "ctaLabel": "联系管理员开通",
+    "helperText": "AI 估价仅供参考，不替代线下复检和正式评估。"
+  },
+  "tokenPolicy": {
+    "basis": "monthly",
+    "resetDay": 1,
+    "note": "Token 配额按自然月重置；超量可由管理员人工临时加量。"
+  }
+}

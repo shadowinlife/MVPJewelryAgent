@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "id": "u_001",
+      "phone": "13800000001",
+      "phoneSuffix": "0001",
+      "nickname": "演示用户·小杨",
+      "membership": "pro",
+      "membershipExpiresAt": "2026-12-31T23:59:59+08:00",
+      "remainingReports": 18,
+      "createdAt": "2026-01-08T10:23:00+08:00",
+      "lastLoginAt": "2026-05-21T19:11:00+08:00",
+      "source": "mock"
+    },
+    {
+      "id": "u_002",
+      "phone": "13800000002",
+      "phoneSuffix": "0002",
+      "nickname": "演示用户·林女士",
+      "membership": "basic",
+      "membershipExpiresAt": "2026-08-15T23:59:59+08:00",
+      "remainingReports": 5,
+      "createdAt": "2026-02-19T15:02:00+08:00",
+      "lastLoginAt": "2026-05-20T09:30:00+08:00",
+      "source": "mock"
+    },
+    {
+      "id": "u_003",
+      "phone": "13800000003",
+      "phoneSuffix": "0003",
+      "nickname": "演示用户·商家A",
+      "membership": "business_pro",
+      "membershipExpiresAt": "2027-04-30T23:59:59+08:00",
+      "remainingReports": 200,
+      "createdAt": "2025-11-02T11:47:00+08:00",
+      "lastLoginAt": "2026-05-22T08:15:00+08:00",
+      "source": "mock"
+    },
+    {
+      "id": "u_004",
+      "phone": "13800000004",
+      "phoneSuffix": "0004",
+      "nickname": "演示用户·新人体验",
+      "membership": "free",
+      "membershipExpiresAt": null,
+      "remainingReports": 2,
+      "createdAt": "2026-05-20T20:00:00+08:00",
+      "lastLoginAt": "2026-05-22T07:42:00+08:00",
+      "source": "mock"
+    }
+  ],
+  "admin": {
+    "username": "admin",
+    "password": "yaoqi2026",
+    "displayName": "曜齐运营 · Admin"
+  }
+}

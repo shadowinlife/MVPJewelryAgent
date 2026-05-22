@@ -1,0 +1,126 @@
+{
+  "reports": [
+    {
+      "caseId": "case_2026_0001",
+      "source": "mock",
+      "generatedAt": "2026-05-18T16:42:00+08:00",
+      "free": {
+        "materialHint": "倾向天然 A 货翡翠,糯种偏冰。",
+        "risk": "中等",
+        "needReinspect": true
+      },
+      "basic": {
+        "priceRange": "参考价格区间:18,000 ~ 26,000 元",
+        "liquidity": "中等偏上,二级市场有稳定需求。"
+      },
+      "pro": {
+        "recyclePrice": "即时回收参考:12,000 ~ 14,500 元",
+        "fullRisk": [
+          "存在轻度飘花,影响等级判断",
+          "无机构证书,需复检糯种与色根",
+          "金属镶口疑似 18K,需进一步检测"
+        ]
+      },
+      "business": {
+        "negotiationStrategy": "建议从冰种相似品对比切入,压价 15-20%。",
+        "auctionCeiling": "法拍上限建议不高于 16,000 元。",
+        "channelHint": "适合走熟客寄售,回款周期约 2-4 周。"
+      },
+      "businessPro": {
+        "similarCases": ["YQ-2025-0312", "YQ-2025-0488"],
+        "batchHint": "可与近 30 日类似手镯批量出价。"
+      },
+      "customerBrief": {
+        "materialHint": "外观与结构倾向天然 A 货翡翠,种水属糯种偏冰,色阳带飘花。",
+        "qualityHighlights": [
+          "色调通透,光线下水头较好",
+          "佩戴质感细腻,种水均匀",
+          "整体造型完整,无明显磕碰"
+        ],
+        "mainRisks": [
+          "目前无第三方鉴定机构证书,建议补充正规检测",
+          "存在轻度飘花,价格区间会因等级判定有所浮动"
+        ],
+        "needReinspect": true,
+        "gentleConclusion": "整体品相符合天然翡翠特征,建议线下走一次权威机构复检后再做交易决定。"
+      }
+    },
+    {
+      "caseId": "case_2026_0002",
+      "source": "mock",
+      "generatedAt": "2026-05-19T22:11:00+08:00",
+      "free": {
+        "materialHint": "倾向和田玉籽料,皮色自然,需复检产地。",
+        "risk": "较低",
+        "needReinspect": true
+      },
+      "basic": {
+        "priceRange": "参考价格区间:6,500 ~ 9,800 元",
+        "liquidity": "中等,籽料市场偏理性。"
+      },
+      "pro": null,
+      "business": null,
+      "businessPro": null,
+      "customerBrief": {
+        "materialHint": "外观与皮壳特征倾向和田玉籽料,皮色自然,玉质细腻。",
+        "qualityHighlights": [
+          "皮色过渡自然,具备典型籽料特征",
+          "玉质细腻油润,手感舒适",
+          "雕工流畅,主题清晰"
+        ],
+        "mainRisks": [
+          "产地需正规机构进一步复核",
+          "天然玉石存在轻微内部结构差异,属正常现象"
+        ],
+        "needReinspect": true,
+        "gentleConclusion": "总体品相理想,适合长期佩戴或收藏;若用于较大额交易,建议出具正规产地证书。"
+      }
+    },
+    {
+      "caseId": "case_2026_0003",
+      "source": "mock",
+      "generatedAt": "2026-05-22T07:00:00+08:00",
+      "free": {
+        "materialHint": "需核对 GIA 证书号与镭射码。",
+        "risk": "较高",
+        "needReinspect": true
+      },
+      "basic": {
+        "priceRange": "参考价格区间:68,000 ~ 82,000 元",
+        "liquidity": "高,但证书风险若坐实将大幅折价。"
+      },
+      "pro": {
+        "recyclePrice": "即时回收参考:48,000 ~ 56,000 元(按证书风险敏感)",
+        "fullRisk": [
+          "证书疑似二次抛光,需核对镭射码",
+          "存在轻微 SI 包体,建议显微复核",
+          "镶口疑为后镶嵌,影响二级市场流通价"
+        ]
+      },
+      "business": {
+        "negotiationStrategy": "用复检风险条款锁价,先按下限 65,000 元谈判。",
+        "auctionCeiling": "法拍上限建议不高于 70,000 元。",
+        "channelHint": "适合走二级渠道而非零售。"
+      },
+      "businessPro": {
+        "similarCases": ["YQ-2025-1102", "YQ-2025-1198"],
+        "batchHint": "可与同期 1.0-1.5ct GIA 钻戒做批量对比定价。"
+      },
+      "customerBrief": {
+        "materialHint": "随附 GIA 证书,主石规格约 1.2ct,需进一步核对证书与实物的对应关系。",
+        "qualityHighlights": [
+          "证书等级理想,主石尺寸饱满",
+          "切工与对称度优秀,火彩表现良好",
+          "镶嵌工艺整体规整"
+        ],
+        "mainRisks": [
+          "证书与实物的镭射码需亲自核对",
+          "建议显微复核内部包体,确保品质等级与证书一致",
+          "高价钻石强烈建议线下到正规机构复检"
+        ],
+        "needReinspect": true,
+        "gentleConclusion": "钻石本身具有较高价值,但是否符合证书等级仍需线下复检确认,建议在权威机构完成核验后再做最终决定。"
+      }
+    }
+  ]
+}

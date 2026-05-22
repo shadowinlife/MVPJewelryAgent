@@ -1,0 +1,51 @@
+{
+  "ocrResults": [
+    {
+      "caseId": "case_2026_0001",
+      "source": "mock",
+      "status": "succeeded",
+      "imageRef": "/mock/images/cert-jadeite.svg",
+      "fields": [
+        { "key": "agency", "label": "证书机构", "value": "国家珠宝玉石质量监督检验中心 (NGTC)", "confidence": "high" },
+        { "key": "certNo", "label": "证书编号", "value": "NG2026031245", "confidence": "high" },
+        { "key": "conclusion", "label": "检验结论", "value": "翡翠 (A 货)", "confidence": "high" },
+        { "key": "weight", "label": "总质量", "value": "56.32 g", "confidence": "medium" },
+        { "key": "color", "label": "颜色", "value": "浅绿带飘花", "confidence": "low" },
+        { "key": "shape", "label": "形状", "value": "圆条手镯", "confidence": "high" },
+        { "key": "magnify", "label": "放大检查", "value": "可见纤维交织结构", "confidence": "medium" },
+        { "key": "remark", "label": "备注", "value": "未经人工处理", "confidence": "high" }
+      ],
+      "rawText": "国家珠宝玉石质量监督检验中心\n证书编号: NG2026031245\n结论: 翡翠 (A 货)\n总质量: 56.32g\n颜色: 浅绿带飘花\n备注: 未经人工处理"
+    },
+    {
+      "caseId": "case_2026_0002",
+      "source": "mock",
+      "status": "succeeded_with_low_confidence",
+      "imageRef": "/mock/images/cert-hetian.svg",
+      "fields": [
+        { "key": "agency", "label": "证书机构", "value": "新疆和田玉鉴定中心", "confidence": "medium" },
+        { "key": "certNo", "label": "证书编号", "value": "XJHT202604018", "confidence": "high" },
+        { "key": "conclusion", "label": "检验结论", "value": "和田玉 (软玉)", "confidence": "high" },
+        { "key": "weight", "label": "总质量", "value": "18.6 g", "confidence": "high" },
+        { "key": "color", "label": "颜色", "value": "白带糖皮", "confidence": "low" }
+      ],
+      "rawText": "新疆和田玉鉴定中心\n编号: XJHT202604018\n结论: 和田玉 软玉\n重量: 18.6g"
+    },
+    {
+      "caseId": "case_2026_0003",
+      "source": "mock",
+      "status": "succeeded",
+      "imageRef": "/mock/images/cert-gia.svg",
+      "fields": [
+        { "key": "agency", "label": "证书机构", "value": "GIA", "confidence": "high" },
+        { "key": "certNo", "label": "证书编号", "value": "2417002883", "confidence": "high" },
+        { "key": "conclusion", "label": "检验结论", "value": "Natural Diamond", "confidence": "high" },
+        { "key": "weight", "label": "总质量 (carat)", "value": "1.20", "confidence": "high" },
+        { "key": "color", "label": "颜色", "value": "F", "confidence": "high" },
+        { "key": "clarity", "label": "净度", "value": "VS1", "confidence": "high" },
+        { "key": "cut", "label": "切工", "value": "Excellent", "confidence": "high" }
+      ],
+      "rawText": "GIA Report Number: 2417002883\nNatural Diamond\nCarat Weight: 1.20\nColor: F\nClarity: VS1\nCut: Excellent"
+    }
+  ]
+}

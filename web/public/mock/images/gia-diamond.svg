@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="GIA 钻戒占位图">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f3ebdd"/>
+      <stop offset="100%" stop-color="#ddd2c2"/>
+    </linearGradient>
+    <linearGradient id="dia" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#b9b0a3"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg3)"/>
+  <circle cx="300" cy="360" r="160" fill="none" stroke="#b08a45" stroke-width="14"/>
+  <polygon points="300,150 360,240 240,240" fill="url(#dia)" stroke="#3a332b" stroke-width="2"/>
+  <polygon points="240,240 360,240 300,330" fill="#f8f4ea" stroke="#3a332b" stroke-width="2"/>
+  <text x="300" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#3a332b" letter-spacing="6">GIA 钻戒 · 1.20ct</text>
+</svg>

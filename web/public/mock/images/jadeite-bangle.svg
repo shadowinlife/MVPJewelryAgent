@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="翡翠手镯占位图">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#f3ebdd"/>
+      <stop offset="100%" stop-color="#ddd2c2"/>
+    </radialGradient>
+    <radialGradient id="jade" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8a9a8a"/>
+      <stop offset="60%" stop-color="#5e7d62"/>
+      <stop offset="100%" stop-color="#3a332b"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <circle cx="300" cy="300" r="200" fill="none" stroke="url(#jade)" stroke-width="58"/>
+  <text x="300" y="540" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#3a332b" letter-spacing="6">翡翠手镯 · JADEITE</text>
+</svg>

@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "id": "case_2026_0001",
+      "caseNo": "YQ-2026-0001",
+      "ownerId": "u_001",
+      "title": "翡翠手镯 · 老坑糯种",
+      "category": "翡翠手镯",
+      "purpose": "出售",
+      "risk": "medium",
+      "status": "analyzed",
+      "source": "mock",
+      "thumbnail": "/mock/images/jadeite-bangle.svg",
+      "summary": {
+        "materialHint": "天然 A 货翡翠，糯种偏冰，色阳但带飘花。",
+        "liquidity": "中等偏上",
+        "needReinspect": true,
+        "membershipFloor": "pro"
+      },
+      "createdAt": "2026-05-12T11:20:00+08:00",
+      "updatedAt": "2026-05-18T16:42:00+08:00"
+    },
+    {
+      "id": "case_2026_0002",
+      "caseNo": "YQ-2026-0002",
+      "ownerId": "u_002",
+      "title": "和田玉吊坠 · 白玉籽料",
+      "category": "和田玉吊坠",
+      "purpose": "购买",
+      "risk": "low",
+      "status": "pending_recheck",
+      "source": "mock",
+      "thumbnail": "/mock/images/hetian-pendant.svg",
+      "summary": {
+        "materialHint": "倾向和田玉籽料，皮色自然，需复检结构与产地证书。",
+        "liquidity": "中等",
+        "needReinspect": true,
+        "membershipFloor": "basic"
+      },
+      "createdAt": "2026-05-15T09:05:00+08:00",
+      "updatedAt": "2026-05-19T22:11:00+08:00"
+    },
+    {
+      "id": "case_2026_0003",
+      "caseNo": "YQ-2026-0003",
+      "ownerId": "u_003",
+      "title": "GIA 钻戒 · 1.20ct",
+      "category": "钻戒",
+      "purpose": "法拍",
+      "risk": "high",
+      "status": "pending",
+      "source": "mock",
+      "thumbnail": "/mock/images/gia-diamond.svg",
+      "summary": {
+        "materialHint": "GIA 证书号疑似存在二次抛光，需核对镭射码。",
+        "liquidity": "高",
+        "needReinspect": true,
+        "membershipFloor": "business"
+      },
+      "createdAt": "2026-05-20T18:31:00+08:00",
+      "updatedAt": "2026-05-22T07:00:00+08:00"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="和田玉吊坠占位图">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8f4ea"/>
+      <stop offset="100%" stop-color="#f3ebdd"/>
+    </linearGradient>
+    <radialGradient id="jade2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f8f4ea"/>
+      <stop offset="80%" stop-color="#c8a96a"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg2)"/>
+  <line x1="300" y1="60" x2="300" y2="180" stroke="#b08a45" stroke-width="3"/>
+  <ellipse cx="300" cy="320" rx="130" ry="170" fill="url(#jade2)" stroke="#b08a45" stroke-width="2"/>
+  <text x="300" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#3a332b" letter-spacing="6">和田玉吊坠 · HETIAN</text>
+</svg>

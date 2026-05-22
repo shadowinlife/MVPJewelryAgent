@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="GIA 证书占位图">
+  <rect width="600" height="400" fill="#f8f4ea"/>
+  <rect x="20" y="20" width="560" height="360" fill="none" stroke="#b08a45" stroke-width="2"/>
+  <text x="300" y="80" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#1f1b16">GIA Diamond Grading Report</text>
+  <text x="60" y="150" font-family="monospace" font-size="14" fill="#1f1b16">Report Number: 2417002883</text>
+  <text x="60" y="180" font-family="monospace" font-size="14" fill="#1f1b16">Shape: Round Brilliant</text>
+  <text x="60" y="210" font-family="monospace" font-size="14" fill="#1f1b16">Carat: 1.20</text>
+  <text x="60" y="240" font-family="monospace" font-size="14" fill="#1f1b16">Color: F</text>
+  <text x="60" y="270" font-family="monospace" font-size="14" fill="#1f1b16">Clarity: VS1</text>
+  <text x="60" y="300" font-family="monospace" font-size="14" fill="#1f1b16">Cut: Excellent</text>
+  <text x="540" y="370" text-anchor="end" font-family="Georgia, serif" font-size="11" fill="#b08a45" letter-spacing="4">MOCK CERT</text>
+</svg>

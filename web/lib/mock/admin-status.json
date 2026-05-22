@@ -1,0 +1,26 @@
+{
+  "metrics": {
+    "totalUsers": 4,
+    "paidMembers": 2,
+    "todayNewCases": 1,
+    "pendingRecheck": 2,
+    "ocrFailures": 0,
+    "aiFailures": 0,
+    "highRiskCases": 1,
+    "mockCaseCount": 3,
+    "realCaseCount": 0,
+    "version": "0.1.0-mock"
+  },
+  "modules": [
+    { "key": "auth", "label": "登录注册", "status": "mock", "note": "手机号 + 任意 6 位验证码即登录" },
+    { "key": "case", "label": "案例 CRUD", "status": "mock", "note": "Next.js Route Handlers" },
+    { "key": "oss", "label": "OSS 图片", "status": "pending", "note": "本地占位图，待接入阿里云 OSS" },
+    { "key": "ocr", "label": "证书 OCR", "status": "mock", "note": "返回固定 mock 字段" },
+    { "key": "ai_report", "label": "AI 报告生成", "status": "mock", "note": "按会员等级返回固定文案" },
+    { "key": "membership", "label": "会员开通", "status": "pending", "note": "后台演示按钮，不写入" },
+    { "key": "knowledge", "label": "知识文件管理", "status": "pending", "note": "后台仅显示骨架" },
+    { "key": "export", "label": "数据导出", "status": "pending", "note": "占位按钮" },
+    { "key": "failures", "label": "失败记录", "status": "pending", "note": "占位空表" },
+    { "key": "imports", "label": "历史案例导入", "status": "pending", "note": "占位骨架" }
+  ]
+}
