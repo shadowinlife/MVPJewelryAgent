@@ -25,7 +25,7 @@
 | M1 | Foundation | 🟢 已完成 (2026-05-22) | Level 1 → 2 准备 | 项目骨架 + 设计系统 + 共享组件 + mock 数据契约 | [M1-foundation.md](./milestones/M1-foundation.md) |
 | M2 | User Pages | 🟢 已完成 (2026-05-22) | Level 2 | 用户端 10 个页面,登录 → 报告全流程可点击 | [M2-user-pages.md](./milestones/M2-user-pages.md) |
 | M3 | Admin Pages | ⚪ 未开始 | Level 2 | 管理后台 11 个页面 | [M3-admin-pages.md](./milestones/M3-admin-pages.md)(待创建)|
-| M4 | Real Backend | ⚪ 未开始 | Level 3 | 接真后端 / 数据库 / OSS / OCR / AI | (待规划)|
+| M4 | Real Backend | 🟡 进行中 (Stage 1/4 完成 2026-05-24) | Level 3 | 接真后端 / 数据库 / OSS / OCR / AI | [M4-real-backend.md](./milestones/M4-real-backend.md) |
 | M5 | Pre-public Beta | ⚪ 未开始 | Level 4 | 域名 / HTTPS / 协议 / 备份 / 安全验收 | (待规划)|
 
 状态图例:🟢 已完成 / 🟡 进行中 / ⚪ 未开始 / 🔴 阻塞
@@ -34,27 +34,32 @@
 
 ## 当前 Sprint 焦点
 
-**M2 已完成 (2026-05-22)**:用户端 10 个页面跑通 — 登录 → 工作台 → 案例库 → 5 步新建 → OCR → 案例详情(含会员裁剪) → 客户简洁版 → 我的 / 会员。`curl` 全绿,响应式断点待人工 375 / 768 / 1024 视觉走查。
+**M4 Stage 1 已完成 (2026-05-24)**:`backend/` FastAPI 骨架落地 — `/health` + 信封中间件 + Request-ID + structlog + Dockerfile + 10 个 pytest 用例(envelope×5 / health×2 / request_id×3)。`uv run pytest / ruff / mypy --strict` 三件套全绿。详见 [M4-real-backend.md](./milestones/M4-real-backend.md)。
 
-**M4 准备(2026-05-22 进行中)**:后端架构已定稿 [Backend-Architecture_v0.1.md](./Backend-Architecture_v0.1.md)。技术栈 = FastAPI + 阿里云主体 + Azure OpenAI HK 单点(AI)。§17 后续文档清单 6 项,已产出 2 项:
+**M4 进度速览**(4 Stage):
 
-| 文档 | 状态 |
-|---|---|
-| [skills/backend-engineer.md](../skills/backend-engineer.md) | 🟢 已产出 |
-| [skills/ai-integration-engineer.md](../skills/ai-integration-engineer.md) | 🟢 已产出 |
-| [Backend-Database-Schema_v0.1.md](./Backend-Database-Schema_v0.1.md) | 🟢 已产出 (2026-05-22) |
-| [Backend-Security-Checklist_v0.1.md](./Backend-Security-Checklist_v0.1.md) | 🟢 已产出 (2026-05-22) |
-| [Backend-Deployment-Guide_v0.1.md](./Backend-Deployment-Guide_v0.1.md) | 🟢 已产出 (2026-05-23) |
-| `Backend-API-Spec_v0.1.yaml` | 🟡 推后(FastAPI 骨架起来后由 `/openapi.json` 导出) |
+| Stage | 范围 | 状态 |
+|---|---|---|
+| Stage 1: Foundation | 骨架 + `/health(self)` + 信封 + Request-ID + Dockerfile + pytest 骨架 | 🟢 完成 2026-05-24 |
+| Stage 2: Persistence | 13 张 ORM + Alembic + testcontainers + `/health` 扩 `checks.db` | ⚪ 未启动 |
+| Stage 3: Tier Schemas | 7 个 tier Pydantic + 服务端字段裁剪(覆盖详情/客户简洁版) | ⚪ 未启动 |
+| Stage 4: API + Integrations | 路由 stub + JWT + RBAC + `LLMClient` + OSS/OCR/短信 client | ⚪ 未启动 |
 
-**§17 文档进度 5/6**(API Spec 待 FastAPI 骨架起后从 `/openapi.json` 自动导出)。
+**M4 §17 前置文档进度 5/6**(`Backend-API-Spec_v0.1.yaml` 留 Stage 4 后由 `/openapi.json` 自动导出):
+[skills/backend-engineer.md](../skills/backend-engineer.md) / [skills/ai-integration-engineer.md](../skills/ai-integration-engineer.md) / [Backend-Architecture](./Backend-Architecture_v0.1.md) / [Backend-Database-Schema](./Backend-Database-Schema_v0.1.md) / [Backend-Security-Checklist](./Backend-Security-Checklist_v0.1.md) / [Backend-Deployment-Guide](./Backend-Deployment-Guide_v0.1.md) — 全 🟢 已产出。
 
-**下一步候选**:
-- A. 进入 M4 实施(FastAPI 骨架 + 阿里云资源开账),由 [skills/backend-engineer.md](../skills/backend-engineer.md) 接手
-- B. 解锁 [tracker §2.4 物料](./discussions/M4-backend-rollout-tracker.md)(域名 / ICP / KMS / Azure ownership),否则 M4 实施会卡住
-- C. 回头铺 M3 管理后台 11 页
+**M4 Stage 1 附带的工程约定**(跨会话生效):
 
-等业务方拍板。讨论进度详见 [docs/discussions/M4-backend-rollout-tracker.md](./discussions/M4-backend-rollout-tracker.md)。
+- AGENT.md 新增「代码规范 / 注释即文档」7+1 条 — `class` / `def` / 关键业务逻辑 / 关键变量必须中文 docstring + WHY 注释,**覆盖默认"少注释"规则**。Stage 2~4 全部继承。
+- 信封 `{ok, data, error, source}` 四字段对齐前端 `web/lib/types/domain.ts`,`extra="forbid"` 锁死;失败信封禁泄漏内部异常类型(测试守住)。
+
+**下一步候选**(等业务方拍):
+
+- **A. 启动 M4 Stage 2**(工程方独立可推,不依赖物料)— 推荐
+- **B. 等物料解锁后跨 Stage 推进** — KMS / OSS Bucket / ICP / Azure ownership,见 [M4-materials-acquisition-workpack.md](./discussions/M4-materials-acquisition-workpack.md)
+- **C. 回头铺 M3** 管理后台 11 页
+
+讨论决策日志详见 [discussions/M4-backend-rollout-tracker.md](./discussions/M4-backend-rollout-tracker.md)。
 
 ---
 
