@@ -36,7 +36,25 @@
 
 **M2 已完成 (2026-05-22)**:用户端 10 个页面跑通 — 登录 → 工作台 → 案例库 → 5 步新建 → OCR → 案例详情(含会员裁剪) → 客户简洁版 → 我的 / 会员。`curl` 全绿,响应式断点待人工 375 / 768 / 1024 视觉走查。
 
-**下一步候选**:M3 管理后台 11 页(需先创建 `M3-admin-pages.md` 路标),或进入 M4 接真后端(需先决定后端选型)。等待业务方拍板。
+**M4 准备(2026-05-22 进行中)**:后端架构已定稿 [Backend-Architecture_v0.1.md](./Backend-Architecture_v0.1.md)。技术栈 = FastAPI + 阿里云主体 + Azure OpenAI HK 单点(AI)。§17 后续文档清单 6 项,已产出 2 项:
+
+| 文档 | 状态 |
+|---|---|
+| [skills/backend-engineer.md](../skills/backend-engineer.md) | 🟢 已产出 |
+| [skills/ai-integration-engineer.md](../skills/ai-integration-engineer.md) | 🟢 已产出 |
+| [Backend-Database-Schema_v0.1.md](./Backend-Database-Schema_v0.1.md) | 🟢 已产出 (2026-05-22) |
+| [Backend-Security-Checklist_v0.1.md](./Backend-Security-Checklist_v0.1.md) | 🟢 已产出 (2026-05-22) |
+| [Backend-Deployment-Guide_v0.1.md](./Backend-Deployment-Guide_v0.1.md) | 🟢 已产出 (2026-05-23) |
+| `Backend-API-Spec_v0.1.yaml` | 🟡 推后(FastAPI 骨架起来后由 `/openapi.json` 导出) |
+
+**§17 文档进度 5/6**(API Spec 待 FastAPI 骨架起后从 `/openapi.json` 自动导出)。
+
+**下一步候选**:
+- A. 进入 M4 实施(FastAPI 骨架 + 阿里云资源开账),由 [skills/backend-engineer.md](../skills/backend-engineer.md) 接手
+- B. 解锁 [tracker §2.4 物料](./discussions/M4-backend-rollout-tracker.md)(域名 / ICP / KMS / Azure ownership),否则 M4 实施会卡住
+- C. 回头铺 M3 管理后台 11 页
+
+等业务方拍板。讨论进度详见 [docs/discussions/M4-backend-rollout-tracker.md](./discussions/M4-backend-rollout-tracker.md)。
 
 ---
 
