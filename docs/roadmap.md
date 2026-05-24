@@ -25,7 +25,7 @@
 | M1 | Foundation | 🟢 已完成 (2026-05-22) | Level 1 → 2 准备 | 项目骨架 + 设计系统 + 共享组件 + mock 数据契约 | [M1-foundation.md](./milestones/M1-foundation.md) |
 | M2 | User Pages | 🟢 已完成 (2026-05-22) | Level 2 | 用户端 10 个页面,登录 → 报告全流程可点击 | [M2-user-pages.md](./milestones/M2-user-pages.md) |
 | M3 | Admin Pages | ⚪ 未开始 | Level 2 | 管理后台 11 个页面 | [M3-admin-pages.md](./milestones/M3-admin-pages.md)(待创建)|
-| M4 | Real Backend | 🟡 进行中 (Stage 1/4 完成 2026-05-24) | Level 3 | 接真后端 / 数据库 / OSS / OCR / AI | [M4-real-backend.md](./milestones/M4-real-backend.md) |
+| M4 | Real Backend | 🟡 进行中 (Stage 1+2/4 完成 2026-05-24) | Level 3 | 接真后端 / 数据库 / OSS / OCR / AI | [M4-real-backend.md](./milestones/M4-real-backend.md) |
 | M5 | Pre-public Beta | ⚪ 未开始 | Level 4 | 域名 / HTTPS / 协议 / 备份 / 安全验收 | (待规划)|
 
 状态图例:🟢 已完成 / 🟡 进行中 / ⚪ 未开始 / 🔴 阻塞
@@ -34,28 +34,31 @@
 
 ## 当前 Sprint 焦点
 
-**M4 Stage 1 已完成 (2026-05-24)**:`backend/` FastAPI 骨架落地 — `/health` + 信封中间件 + Request-ID + structlog + Dockerfile + 10 个 pytest 用例(envelope×5 / health×2 / request_id×3)。`uv run pytest / ruff / mypy --strict` 三件套全绿。详见 [M4-real-backend.md](./milestones/M4-real-backend.md)。
+**M4 Stage 1 + Stage 2 已完成 (2026-05-24)**:`backend/` FastAPI 骨架(Stage 1)+ 持久层(Stage 2,13 张 ORM + Alembic 0001_init + testcontainers per-test SAVEPOINT + `/health.db`)落地。`uv run pytest -v` 27 用例全绿(Stage 1 × 10 + Stage 2 × 17),`uv run ruff check / mypy --strict` 全清,`alembic upgrade/downgrade/check` 三连验证 OK。详见 [M4-real-backend.md](./milestones/M4-real-backend.md)。
 
 **M4 进度速览**(4 Stage):
 
 | Stage | 范围 | 状态 |
 |---|---|---|
 | Stage 1: Foundation | 骨架 + `/health(self)` + 信封 + Request-ID + Dockerfile + pytest 骨架 | 🟢 完成 2026-05-24 |
-| Stage 2: Persistence | 13 张 ORM + Alembic + testcontainers + `/health` 扩 `checks.db` | ⚪ 未启动 |
+| Stage 2: Persistence | 13 张 ORM + Alembic 单 revision 全落 + testcontainers(pgvector/pg16)+ `/health` 扩 `checks.db` | 🟢 完成 2026-05-24 |
 | Stage 3: Tier Schemas | 7 个 tier Pydantic + 服务端字段裁剪(覆盖详情/客户简洁版) | ⚪ 未启动 |
-| Stage 4: API + Integrations | 路由 stub + JWT + RBAC + `LLMClient` + OSS/OCR/短信 client | ⚪ 未启动 |
+| Stage 4: API + Integrations | 路由 stub + JWT + RBAC + DAO/Service + `LLMClient` + OSS/OCR/短信 client + Seed | ⚪ 未启动 |
 
 **M4 §17 前置文档进度 5/6**(`Backend-API-Spec_v0.1.yaml` 留 Stage 4 后由 `/openapi.json` 自动导出):
 [skills/backend-engineer.md](../skills/backend-engineer.md) / [skills/ai-integration-engineer.md](../skills/ai-integration-engineer.md) / [Backend-Architecture](./Backend-Architecture_v0.1.md) / [Backend-Database-Schema](./Backend-Database-Schema_v0.1.md) / [Backend-Security-Checklist](./Backend-Security-Checklist_v0.1.md) / [Backend-Deployment-Guide](./Backend-Deployment-Guide_v0.1.md) — 全 🟢 已产出。
 
-**M4 Stage 1 附带的工程约定**(跨会话生效):
+**M4 Stage 1+2 附带的工程约定**(跨会话生效):
 
 - AGENT.md 新增「代码规范 / 注释即文档」7+1 条 — `class` / `def` / 关键业务逻辑 / 关键变量必须中文 docstring + WHY 注释,**覆盖默认"少注释"规则**。Stage 2~4 全部继承。
 - 信封 `{ok, data, error, source}` 四字段对齐前端 `web/lib/types/domain.ts`,`extra="forbid"` 锁死;失败信封禁泄漏内部异常类型(测试守住)。
+- **不引入 psycopg/psycopg2**(D8):alembic env.py 用 async pattern + `_coerce_async_driver()` 统一升 asyncpg。
+- alembic 触发器用 `clock_timestamp()` 而非 `now()`(同事务时间戳塌陷防护);autogen 假阳性走 `include_object` 白名单(9 条 raw SQL 索引)。
+- testcontainers 用 `pgvector/pgvector:pg16`(D3)+ per-test SAVEPOINT(D4);`/health.db` 失败 HTTP 仍 200 仅标 `degraded`(D5)。
 
 **下一步候选**(等业务方拍):
 
-- **A. 启动 M4 Stage 2**(工程方独立可推,不依赖物料)— 推荐
+- **A. 启动 M4 Stage 3**(7 tier Pydantic schema + `cropReportForUser` 服务端裁剪;工程方独立可推)— 推荐
 - **B. 等物料解锁后跨 Stage 推进** — KMS / OSS Bucket / ICP / Azure ownership,见 [M4-materials-acquisition-workpack.md](./discussions/M4-materials-acquisition-workpack.md)
 - **C. 回头铺 M3** 管理后台 11 页
 

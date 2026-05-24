@@ -49,7 +49,7 @@
 | Stage | 范围 | 状态 | 完成日 |
 |---|---|---|---|
 | **Stage 1: Foundation** | FastAPI 骨架 + `/health(self)` + envelope / request-id 中间件 + Settings + structlog + Dockerfile + pytest 骨架(10 用例) | 🟢 完成 | 2026-05-24 |
-| **Stage 2: Persistence** | 13 张 ORM + Alembic 初始迁移 + testcontainers fixture;`/health` 扩 `checks.db` | ⚪ 未启动 | — |
+| **Stage 2: Persistence** | 13 张 ORM + Alembic 初始迁移(扩展 + 13 表 + CHECK + 索引 + 触发器 + pgvector 列)+ testcontainers fixture(per-test SAVEPOINT)+ `/health` 扩 `checks.db` | 🟢 完成 | 2026-05-24 |
 | **Stage 3: Tier Schemas** | 7 个 tier Pydantic schema + 服务端字段裁剪覆盖详情/客户简洁版 | ⚪ 未启动 | — |
 | **Stage 4: API + Integrations** | auth/cases/reports/files/ocr/memberships 路由 + JWT + RBAC + `LLMClient` + OSS/OCR/短信 client | ⚪ 未启动 | — |
 
@@ -59,9 +59,18 @@
 - 信封 `{ok, data, error, source}` 四字段对齐前端 TS,`extra="forbid"` 锁死;失败信封**禁泄漏** `code` / `requestId` / 内部异常类型(测试守住)。
 - 中间件挂载顺序固定:外层 `ErrorHandlerMiddleware`(兜底)/ 内层 `RequestIdMiddleware`(给错误日志带 request_id)。Stage 2~4 加新中间件需在 `app/main.py` 注释清楚相对位置。
 
+**Stage 2 落地附带的工程约定**(本会话引入,跨会话生效):
+
+- **不引入 psycopg / psycopg2**(D8):alembic env.py 用 async pattern(`asyncpg + run_sync`);`_coerce_async_driver()` 把任何前缀(包括 testcontainers 给的 `+psycopg2`)统一升级为 `+asyncpg`。Stage 3~4 任何 sync DB 工具(脚本 / 一次性任务)也走 asyncpg。
+- **alembic 触发器函数用 `clock_timestamp()` 而非 `now()`**:`now()` 同事务内返回相同值,`updated_at` 触发器在同一 transaction(SAVEPOINT 隔离测试)中"看不出动作";`clock_timestamp()` 是真实墙钟,行为正确。
+- **autogen 假阳性走 `include_object` 白名单**:9 条 raw SQL 维护的索引(`uq_membership_current` / `idx_*_embedding` / GIN / 部分索引)在 alembic env.py 的 `_RAW_SQL_INDEX_NAMES` 跳过 ——SQLAlchemy `Index()` 对 `postgresql_where` + `using="ivfflat"` + 表达式 GIN 支持弱,与其勉强落到 `__table_args__` 不如 raw SQL + 白名单清晰。
+- **pytest 跑 alembic 同步命令必走线程隔离**:`tests/conftest.py::_run_in_thread()`;直接在 pytest event loop 里调 `command.upgrade()` 会撞 env.py 的 `asyncio.run()`。
+- **testcontainers 用 `pgvector/pgvector:pg16`**(D3),自带 TCP 探活(`_wait_for_pg_ready`,不依赖 psycopg2);per-test SAVEPOINT 隔离(`join_transaction_mode="create_savepoint"`),不每用例 DROP/CREATE schema。
+- **`/health.db` 失败不返 503**(D5):HTTP 仍 200,只在 `data.status="degraded"` + `data.checks.db="unavailable"` 标记;K8s liveness 看 HTTP code,readiness 才看 status。
+
 下一步候选(等业务方拍板):
 
-- **Stage 2 启动**(工程方独立可推,不依赖物料)— 推荐
+- **Stage 3 启动**(7 tier Pydantic schema + `cropReportForUser` 服务端裁剪)— 工程方独立可推,推荐
 - **等物料解锁后跨 Stage 推进** — 见 §2.4
 - **回头铺 M3**
 

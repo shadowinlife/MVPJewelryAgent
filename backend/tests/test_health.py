@@ -12,7 +12,12 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_health_returns_envelope_ok(client: AsyncClient) -> None:
-    """正常路径:200 + ok 信封 + Stage 1 的 checks 只有 self。"""
+    """正常路径:200 + ok 信封 + Stage 2 的 checks 至少有 self / db。
+
+    `db` 单项可能是 `ok`(测试启了 PG)或 `unavailable`(纯单元测试无 DB);
+    本测试只锁 envelope 形状与 checks 必含 key,**不**锁 db 具体值 —— 那个
+    交给 `test_health_db.py` 专门验证。
+    """
     response = await client.get("/health")
     assert response.status_code == 200
 
@@ -22,10 +27,13 @@ async def test_health_returns_envelope_ok(client: AsyncClient) -> None:
     assert body["source"] == "real"
 
     data = body["data"]
-    assert data["status"] == "ok"
+    # 整体 status:`ok` 或 `degraded`,但绝不会是 unavailable / not_configured
+    # (聚合规则见 health._aggregate_status)
+    assert data["status"] in ("ok", "degraded")
     assert data["version"] == "0.1.0"
-    # Stage 2 起 checks 会扩成 {"self": "ok", "db": "ok", ...};该断言到时再补。
-    assert data["checks"] == {"self": "ok"}
+    # Stage 2 起 checks 必含 self + db;Stage 4 会再补 redis / oss / aoai
+    assert set(data["checks"].keys()) >= {"self", "db"}
+    assert data["checks"]["self"] == "ok"
 
 
 @pytest.mark.asyncio

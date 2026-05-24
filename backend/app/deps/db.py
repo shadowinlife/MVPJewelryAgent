@@ -1,24 +1,40 @@
-"""DB 依赖占位。
+"""DB 依赖:每请求 AsyncSession 工厂。
 
-Stage 1 不连任何数据源;本文件存在只是为了让其它模块可以提前 `from
-app.deps.db import get_db` 而不报 ImportError(将来路由函数会 `Depends(get_db)`,
-现在打的是空 wire 防止 Stage 2 一接就要批量改 import)。
+`Depends(get_db)` 在 FastAPI 路由里产出一个独立 `AsyncSession`,生命周期与
+单次请求绑定:
+- 进入路由:打开 session
+- 路由正常返回:`commit()` 提交事务
+- 路由抛异常:`rollback()` 回滚,再把异常向上抛(交给 envelope 中间件转 500)
 
-Stage 2 替换实现:
-1. 引入 `sqlalchemy.ext.asyncio.AsyncSession` + `async_sessionmaker`;
-2. 从 `app.db.session` 拿 engine,产出 session;
-3. `yield` 后 `commit()` / `rollback()` 收尾;
-4. 删除本文件中的 `NotImplementedError` 分支。
+为什么不在路由内显式 `async with session.begin():` 而是放在 dep 里:
+- 多数路由就是"几条 SELECT / INSERT 然后返回",dep 兜底 commit 减少模板代码;
+- 需要细粒度事务的复杂路由,可以在 dep 给的 session 上自己 `session.begin_nested()`
+  或 `session.begin()`,但要在最外层显式 commit / rollback 后再 yield 控制权
+  给 dep —— dep 的 commit 不会重复(SQLAlchemy 检测已 commit 的事务为 no-op)。
+
+测试覆盖:`app.dependency_overrides[get_db]` 注入一个 yields 测试 session 的
+async generator 即可,本模块代码不需要改。
 """
 
 from collections.abc import AsyncIterator
-from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.session import AsyncSessionLocal
 
 
-async def get_db() -> AsyncIterator[Any]:
-    """`Depends(get_db)` 占位实现。Stage 1 调用会直接抛 NotImplementedError,
-    迫使任何提前误用 DB 的代码立刻失败,而不是静默拿到 None 后再炸在 SQL 层。
+async def get_db() -> AsyncIterator[AsyncSession]:
+    """每请求 `AsyncSession` 工厂。
+
+    `async with AsyncSessionLocal()` 用 sessionmaker 单例造一个 session;`yield`
+    后路由开始用它;`yield` 之后的代码在路由返回或抛异常时跑(类似上下文管理器
+    的 `__exit__`),`commit` 失败也会触发 `rollback`,确保连接归还前事务有明确
+    终态。
     """
-    raise NotImplementedError("DB session factory wired in Stage 2 (ORM + Alembic).")
-    # 下面这行永远跑不到,但保留可以让 mypy 把函数识别为 AsyncIterator 而不是普通 async 函数。
-    yield  # pragma: no cover
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise

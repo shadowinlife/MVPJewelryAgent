@@ -1,8 +1,10 @@
 # YAOQI Backend (FastAPI)
 
-> M4 milestone, **Stage 1: Foundation**. Minimal runnable skeleton — `app.main:app` + `/health` + envelope middleware. No DB, no Redis, no OSS, no Azure OpenAI yet (those land in Stage 2–4).
+> M4 milestone, **Stage 2: Persistence** ✅. Stage 1 Foundation + 13 SQLAlchemy 2.0 async ORMs + Alembic 初始迁移(扩展 / CHECK / 部分索引 / 触发器 / pgvector)+ testcontainers fixture + `/health` 加 `checks.db`。
 >
-> 父文档:[../docs/Backend-Architecture_v0.1.md](../docs/Backend-Architecture_v0.1.md) / [../docs/Backend-Deployment-Guide_v0.1.md](../docs/Backend-Deployment-Guide_v0.1.md) / [../skills/backend-engineer.md](../skills/backend-engineer.md)
+> 还**没**有的:DAO/Service/Repository、路由 stub、RBAC、LLMClient、OSS/OCR/SMS clients、Seed —— 这些是 Stage 3-4。
+>
+> 父文档:[../docs/Backend-Architecture_v0.1.md](../docs/Backend-Architecture_v0.1.md) / [../docs/Backend-Database-Schema_v0.1.md](../docs/Backend-Database-Schema_v0.1.md) / [../docs/Backend-Deployment-Guide_v0.1.md](../docs/Backend-Deployment-Guide_v0.1.md) / [../skills/backend-engineer.md](../skills/backend-engineer.md)
 
 ---
 
@@ -10,12 +12,13 @@
 
 - Python **3.12**
 - FastAPI 0.115 / Pydantic 2.9 / pydantic-settings 2.6
+- **SQLAlchemy 2.0(async)** + asyncpg + Alembic + pgvector(Stage 2)
 - Uvicorn + Gunicorn(`UvicornWorker`)
 - structlog(JSON logs)
-- pytest 8 / httpx / ruff / mypy --strict
+- pytest 8 / httpx / **testcontainers**(真 PG)/ ruff / mypy --strict
 - Package mgmt: **uv** 0.4.30(via conda env)
 
-> Stage 2-4 will add: SQLAlchemy 2.0 / asyncpg / Alembic / pgvector / Redis / Arq / openai / instructor / oss2 / aliyun-python-sdk-* / passlib / pyjwt / testcontainers.
+> Stage 3-4 will add: Redis / Arq / openai / instructor / oss2 / aliyun-python-sdk-* / passlib / pyjwt。
 
 ---
 
@@ -33,27 +36,45 @@ pip install uv==0.4.30
 cd backend
 uv sync
 
-# 3. 准备 env
-cp .env.example .env
-# Stage 1 不需要改任何值,默认 APP_ENV=local 即可跑
+# 3. 起本地 Postgres(pgvector pre-installed,与生产 RDS PG16 + pgvector 对齐)
+docker run -d --name yaoqi-pg-dev \
+  -e POSTGRES_USER=yq_app -e POSTGRES_PASSWORD=CHANGEME -e POSTGRES_DB=yaoqi \
+  -p 5432:5432 pgvector/pgvector:pg16
 
-# 4. 跑起来
+# 4. 准备 env(默认 DATABASE_URL 已指向上面的本地 PG)
+cp .env.example .env
+
+# 5. 跑 Alembic 升级到 head
+uv run alembic upgrade head
+# 期望:13 表 + 3 扩展 + 7 触发器 + 9 部分索引/GIN/ivfflat 落盘
+# 反向验证(可选):uv run alembic downgrade base && uv run alembic upgrade head
+# 检测 ORM ↔ DDL 漂移:uv run alembic check  (exit 0 = 无 pending diff)
+
+# 6. 跑起来
 uv run uvicorn app.main:app --reload --port 8000
 
-# 5. 验证
+# 7. 验证
 curl -s http://localhost:8000/health | jq
-# 期望:{"ok":true,"data":{"status":"ok","version":"0.1.0","checks":{"self":"ok"}},"source":"real"}
+# 期望:{"ok":true,"data":{"status":"ok","checks":{"self":"ok","db":"ok"}},"source":"real"}
+
+# 8. 停 PG 验证降级(可选)
+docker stop yaoqi-pg-dev && curl -s http://localhost:8000/health | jq
+# 期望:HTTP 仍 200,data.status="degraded",checks.db="unavailable"(D5)
 ```
 
 ---
 
 ## 测试 / 类型 / lint
 
+> **⚠️ Stage 2 起,跑 `pytest` 需要本机 Docker daemon(testcontainers 起 pgvector container)。**
+> 首次会拉 `pgvector/pgvector:pg16` 镜像(1-2 min);后续命中 layer cache 秒级起。
+> CI(GitHub Actions)在 PG 上 cache image layer 即可。
+
 ```bash
-uv run pytest -v                    # 全部测试
+uv run pytest -v                    # 全部测试(testcontainers 自起 PG,无需手动 docker run)
 uv run ruff check .                 # lint
 uv run ruff format --check .        # 格式
-uv run mypy --strict app/           # 类型严格
+uv run mypy --strict app/           # 类型严格(不含 alembic/versions/)
 ```
 
 CI 顺序与上述一致;任一失败阻塞 merge。
@@ -75,7 +96,8 @@ docker run --rm -p 8000:8000 --env-file backend/.env yaoqi-backend:dev
 curl -s http://localhost:8000/health | jq .data.status   # "ok"
 ```
 
-`entrypoint.sh` 现支持 `api` / `shell`;Stage 2 加 `migrate`,Stage 4 加 `worker`。
+`entrypoint.sh` 现支持 `api` / `migrate` / `shell`;Stage 4 会加 `worker`。
+部署流水线建议:`docker run --rm yaoqi-backend migrate` → `docker run -d yaoqi-backend api`(先迁后启)。
 
 ---
 
@@ -97,27 +119,36 @@ curl -s http://localhost:8000/health | jq .data.status   # "ok"
 
 ---
 
-## 目录结构(Stage 1 现状)
+## 目录结构(Stage 2 现状)
 
 ```
 backend/
 ├─ pyproject.toml / uv.lock / .python-version
 ├─ Dockerfile / .dockerignore
-├─ scripts/entrypoint.sh
+├─ alembic.ini
+├─ alembic/
+│  ├─ env.py                       # async pattern,target_metadata=Base.metadata
+│  ├─ script.py.mako
+│  └─ versions/0001_init.py        # 13 表 + 扩展 + CHECK + 索引 + 触发器 + pgvector
+├─ scripts/entrypoint.sh           # api | migrate | shell
 ├─ app/
-│  ├─ main.py                    # FastAPI 入口 + 中间件挂载
+│  ├─ main.py                      # FastAPI 入口 + 中间件挂载
 │  ├─ core/
-│  │  ├─ config.py               # pydantic-settings Settings
-│  │  ├─ logging.py              # structlog 初始化
-│  │  └─ exceptions.py           # AppException + handler
-│  ├─ schemas/envelope.py        # ApiResponse[T] / 错误信封
-│  ├─ middleware/                # request_id / envelope / error_handler
-│  ├─ deps/                      # 依赖工厂(Stage 2 起填实)
-│  └─ api/v1/health.py           # GET /health
-└─ tests/                        # pytest + httpx AsyncClient
+│  │  ├─ config.py                 # Settings(含 db_pool / health_db_timeout)
+│  │  ├─ logging.py                # structlog 初始化
+│  │  └─ exceptions.py             # AppException + handler
+│  ├─ schemas/envelope.py          # ApiResponse[T] / 错误信封
+│  ├─ middleware/                  # request_id / envelope / error_handler
+│  ├─ db/
+│  │  ├─ base.py                   # DeclarativeBase + IdMixin + TimestampMixin + MockableMixin
+│  │  ├─ session.py                # create_async_engine + async_sessionmaker
+│  │  └─ models/                   # 13 ORM 一表一文件
+│  ├─ deps/db.py                   # get_db() → AsyncSession
+│  └─ api/v1/health.py             # GET /health(self + db)
+└─ tests/                          # pytest + httpx + testcontainers
 ```
 
-Stage 2 起会扩 `app/db/`、`app/services/`、`app/integrations/`、`app/workers/`。结构按 [Backend-Architecture §4.1](../docs/Backend-Architecture_v0.1.md) 落。
+Stage 3 起会扩 `app/services/`、`app/integrations/`、`app/workers/`。结构按 [Backend-Architecture §4.1](../docs/Backend-Architecture_v0.1.md) 落。
 
 ---
 
@@ -132,8 +163,7 @@ Stage 2 起会扩 `app/db/`、`app/services/`、`app/integrations/`、`app/worke
 
 ---
 
-## Stage 2-4 待办(本 Stage 不动)
+## Stage 3-4 待办(本 Stage 不动)
 
-- Stage 2:ORM 13 表 + Alembic 初始迁移 + testcontainers + `/health` 加 DB/Redis 探活
-- Stage 3:7 个 tier 报告 schema + 字段裁剪服务
-- Stage 4:auth/cases/reports 路由 stub + RBAC + LLMClient Protocol + OSS/OCR/SMS/AOAI client stubs + `tests/test_rbac_redlines.py`
+- Stage 3:7 个 tier 报告 Pydantic schema + `crop_report_for_user(tier)` 服务端裁剪
+- Stage 4:auth/cases/reports 路由 stub + RBAC + LLMClient Protocol + OSS/OCR/SMS/AOAI client stubs + Seed(super_admin / 字典)+ `/health` 扩 `checks.redis/oss/aoai` + `tests/test_rbac_redlines.py`
