@@ -1,7 +1,7 @@
 # 曜齐 YAOQI 玉石珠宝鉴定估价助手 — Roadmap
 
 > 总览文件,按 AGENT.md §2 工作流维护。每个路标(里程碑)对应 [`milestones/`](./milestones/) 下的独立文件。
-> 最后更新:2026-05-25(M4 Stage 1+2 落地 + 关键路径与未决决策清单上抬)
+> 最后更新:2026-05-26(M4 Stage 3 落地 — 7 tier Pydantic + 8 红线锁定;Stage 4 等物料 + AI 工程接手时机拍板)
 
 ## 项目背景
 
@@ -31,7 +31,7 @@
 | M1 | Foundation | 🟢 已完成 2026-05-22 | Level 1 → 2 准备 | 项目骨架 + 设计系统 + 共享组件 + mock 数据契约 | [M1-foundation.md](./milestones/M1-foundation.md) |
 | M2 | User Pages | 🟢 已完成 2026-05-22 | Level 2 | 用户端 10 个页面,登录 → 报告全流程可点击 | [M2-user-pages.md](./milestones/M2-user-pages.md) |
 | M3 | Admin Pages | ⚪ 未开始 | Level 2 | 管理后台 11 个页面 | 📝 **路标文件待创建** `M3-admin-pages.md`(业务方插队前 1h 内补写)|
-| M4 | Real Backend | 🟡 进行中 2/4 Stage | Level 3 | 接真后端 / 数据库 / OSS / OCR / AI | [M4-real-backend.md](./milestones/M4-real-backend.md) |
+| M4 | Real Backend | 🟡 进行中 3/4 Stage | Level 3 | 接真后端 / 数据库 / OSS / OCR / AI | [M4-real-backend.md](./milestones/M4-real-backend.md) |
 | M5 | Pre-public Beta | ⚪ 未开始 | Level 4 | 域名 / HTTPS / 协议 / 备份 / 安全验收 | (待规划)|
 
 状态图例:🟢 已完成 / 🟡 进行中 / ⚪ 未开始 / 🔴 阻塞
@@ -42,61 +42,71 @@
 |---|---|---|---|
 | Stage 1: Foundation | FastAPI 骨架 + `/health(self)` + 信封 + Request-ID + Dockerfile + pytest | 🟢 完成 2026-05-24 | — |
 | Stage 2: Persistence | 13 ORM + Alembic 0001 + testcontainers + `/health.db` | 🟢 完成 2026-05-24 | — |
-| Stage 3: Tier Schemas | 7 个 tier Pydantic + `crop_report_for_user` 服务端裁剪 | ⚪ 未启动 | **无 — 工程方独立可推** |
-| Stage 4: API + Integrations | 路由 + JWT + RBAC + LLMClient + OSS/OCR/短信 client + Seed | ⚪ 未启动 | ⚠️ 受物料 M-01/M-03/M-05/M-06/M-07/M-09 阻塞(见 §关键路径) |
+| Stage 3: Tier Schemas | 7 tier Pydantic + `crop_report_for_user` + 8 RBAC 红线锁定(54 测试全绿) | 🟢 完成 2026-05-26 | — |
+| Stage 4: API + Integrations | 路由 + JWT + RBAC + LLMClient + OSS/OCR/短信 client + Seed | ⚪ 未启动 | ⚠️ 受物料 M-01/M-03/M-05/M-06/M-07/M-09 阻塞(见 §关键路径)+ §2.5 AI 接手时机 + §2.6 灰度策略待拍板 |
 
 ---
 
 ## 关键路径与外部依赖(非编码,独立时间线)
 
 > **写在这里的理由**:这些项 lead time 长、无法靠编码进度压缩,编码再快也卡在它们上线;必须与编码并行触发,不能等 Stage 4 写完才动。
+>
+> **2026-05-26 重要变更**:**M-04 域名 + ICP 备案已废弃**。决议"网站前端部署在香港节点(非境内服务器),后端 + DB + OSS 仍在阿里云华东";前端在境外节点无需工信部 ICP。原 7-20 天关键路径**直接消除**,替换为 **M-13 HK 前端节点 + 域名 DNS 接管**(1-3 天)。详见 [workpack §M-13](./discussions/M4-materials-acquisition-workpack.md)。
 
 | 物料 | Owner | Lead Time | 状态 | 失败影响 |
 |---|---|---|---|---|
-| **M-04 域名 + ICP 备案** ⚠️ 关键路径最长 | 项目方负责人 + 法务 | **7–20 天** | ⚪ | **prod 无法上线** |
-| M-03 Azure 订阅 + OpenAI 准入 | 项目方负责人 + AI 工程 | 7–14 天 | ⚪ | AI 链路无法接入(Stage 4 LLMClient 只能 stub) |
+| ~~**M-04 域名 + ICP 备案**~~ | ~~项目方负责人 + 法务~~ | ~~7–20 天~~ | 🚫 已废弃 2026-05-26 | — |
+| **M-03 Azure 订阅 + OpenAI 准入** ⚠️ **新关键路径最长** | 项目方负责人 + AI 工程 | **7–14 天** | ⚪ | AI 链路无法接入(Stage 4 LLMClient 只能 stub) |
+| M-13 HK 前端节点 + 域名 DNS 接管(替代 M-04)| 项目方负责人 + tech lead | 1–3 天 | ⚪ | 前端无对外访问入口;CORS / cookie 跨域细节 Stage 4 需联动 |
 | M-01 阿里云主账号 + 实名 + 充值 | 项目方负责人 | 1–3 天 | ⚪ | 一切阿里云资源无法创建 |
-| M-05 + M-06 短信签名 + 模板 | 项目方 ops | 1–3 天 / 项 | ⚪ | 登录验证码下不去(MVP 核心断流) |
+| M-05 + M-06 短信签名 + 模板 | 项目方 ops | 1–3 天 / 项 | ⚪ | 登录验证码下不去(MVP 核心断流)|
 | M-07 OSS Bucket(private + SSE-KMS) | 项目方 ops + tech lead | 0.5 天(待 M-01) | ⚪ | OSS 直传无法启用 |
 | M-09 KMS CMK + Secret 入库 | 项目方 ops + DevOps | 1 天(待 M-01) | ⚪ | Secret 只能裸写 `.env`,违反 [Security-Checklist](./Backend-Security-Checklist_v0.1.md) |
 
-完整 12 项执行卡(含 RAM 策略 JSON / 短信文案 / ICP 材料清单):[M4-materials-acquisition-workpack.md](./discussions/M4-materials-acquisition-workpack.md)。
+完整 12 项执行卡(含 RAM 策略 JSON / 短信文案 / HK 前端选型):[M4-materials-acquisition-workpack.md](./discussions/M4-materials-acquisition-workpack.md);§5 原 ICP 材料清单保留为历史参考,不再走流程。
 
-**行动闸口**:**M-04 ICP 必须本周启动**(2026-05-25 ~ 2026-05-31 内甩出邮件),否则 Stage 4 编码完成后仍需空等 2–3 周。
+**行动闸口**:**M-03 Azure OpenAI 准入**取代原 M-04 成为新最长 lead time(7-14 天),**本周必须启动**(2026-05-25 ~ 2026-05-31 内提交 Limited Access Form)。M-13 HK 节点选型(Vercel HK / 阿里云 HK / Cloudflare)1-3 天可定,等 Stage 4 前端集成时联动。
 
 ---
 
 ## 当前 Sprint 焦点
 
-**进度速览**:M4 Stage 1+2 已完成(2026-05-24),27 pytest 全绿、ruff/mypy 干净、alembic upgrade/downgrade/check 三联通过。Stage 详细任务清单见 [M4-real-backend.md](./milestones/M4-real-backend.md);跨会话工程约定(注释即文档 / 不引 psycopg / `clock_timestamp()` 等)见 [memory 索引](../.claude/projects/-Users-mgong-PycharmProjects-ZhuBaoTest/memory/MEMORY.md) 与 [tracker §1.4](./discussions/M4-backend-rollout-tracker.md)。
+**进度速览**:M4 Stage 1+2+3 已完成(2026-05-24 ~ 2026-05-26)。Stage 3 落地后 54 测试全绿(Stage 1 × 10 + Stage 2 × 17 + Stage 3 × 27),ruff/mypy --strict 干净;8 条 RBAC 数据红线由 Pydantic `extra="forbid"` 物理兜底 + `crop_report_for_user` 唯一裁剪入口锁定。Stage 详细任务清单见 [M4-real-backend.md](./milestones/M4-real-backend.md);跨会话工程约定(注释即文档 / 不引 psycopg / `clock_timestamp()` / ReportAdmin 独立 export 等)见 [memory 索引](../.claude/projects/-Users-mgong-PycharmProjects-ZhuBaoTest/memory/MEMORY.md) 与 [tracker §1.4](./discussions/M4-backend-rollout-tracker.md)。
 
 **M4 §17 前置文档进度 5/6**(`Backend-API-Spec_v0.1.yaml` 推后到 Stage 4 后由 `/openapi.json` 自动导出):
 [skills/backend-engineer.md](../skills/backend-engineer.md) · [skills/ai-integration-engineer.md](../skills/ai-integration-engineer.md) · [Backend-Architecture](./Backend-Architecture_v0.1.md) · [Backend-Database-Schema](./Backend-Database-Schema_v0.1.md) · [Backend-Security-Checklist](./Backend-Security-Checklist_v0.1.md) · [Backend-Deployment-Guide](./Backend-Deployment-Guide_v0.1.md) — 全 🟢 已产出。
 
-### 主线推荐:启动 M4 Stage 3
+### 主线焦点:**Stage 4 启动前置 — 物料解锁 + 2 个拍板**
 
-7 个 tier Pydantic schema + `crop_report_for_user(tier, report)` 服务端裁剪服务。
+工程侧 Stage 3 收尾后**唯一可继续推进**的事不是编码,而是**等业务方决策 + 物料到位**。Stage 4 路由代码本身可以独立写出 stub,但 OSS / SMS / Azure 接入不能 `NotImplementedError` 就交付。
 
-**为什么是 Stage 3**:
+**Stage 4 启动闸口**(任一不达成则 Stage 4 不开):
 
-- ✅ 工程方**独立可推**(零物料依赖、零外部 ownership)
-- ✅ ORM 已为它备好(`ai_reports.output_json` + `price_fields_json` + `risk_fields_json` 字段就是为裁剪而设)
-- ✅ 前端 [`web/lib/types/domain.ts`](../web/lib/types/domain.ts) 的 `ReportTier` + `CustomerBrief` 是契约,Pydantic 直接对齐
-- ✅ Stage 3 落地后,Stage 4 路由可直接 `crop_report_for_user(tier)` 拼装,无返工
+1. 🔴 **§2.5 AI 工程接手时机拍板** — 决定 `LLMClient` 落地深度(stub vs 真接入),工作量 ±40%(3 选项见 tracker)
+2. 🔴 **§2.6 前端双写期灰度策略拍板** — 决定 mock route 关停顺序(按用户 / 按接口 / 按比例)
+3. 🟡 至少 **M-01 + M-09** 解锁(阿里云主账号 + KMS Secret 入库)— 让 Settings 能从 KMS 读 OSS / SMS 密钥而非裸 `.env`
 
-**验收门**(对齐 [M4-real-backend.md Stage 3](./milestones/M4-real-backend.md)):8 条 RBAC 红线 + UI-Spec §17.3 数据红线全绿;27 → 35+ 用例;ruff/mypy 干净。
+### 并行轨道(非编码,**必须本周推进**)
 
-### 并行轨道(非编码,**必须本周启动**)
-
-1. **M-04 ICP 备案** — 项目方负责人本周内甩邮件给法务,7–20 天 lead time(见 §关键路径)
-2. **拍板 §2.5 AI 工程接手时机** — 决定 Stage 4 `LLMClient` 做 stub 还是真接入(工作量 ±40%)
-3. **拍板 §2.6 前端双写期灰度策略** — 决定 Stage 4 收尾时 mock route 关停顺序
-4. **补写 `docs/milestones/M3-admin-pages.md` 占位**(1h)— 业务方临时插队 M3 时不至于挂空文件
+1. ~~**M-04 ICP 备案**~~ **已废弃 2026-05-26** — 改走 HK 前端节点(M-13),无 ICP 要求
+2. **M-03 Azure OpenAI 准入(新最长关键路径)** — 项目方负责人本周内提交 Limited Access Form,7-14 天 lead time(否则 Stage 4 LLM 链路只能 stub)
+3. **拍板 §2.5 AI 工程接手时机** — 决定 Stage 4 `LLMClient` 做 stub 还是真接入(工作量 ±40%)
+4. **拍板 §2.6 前端双写期灰度策略** — 决定 Stage 4 收尾时 mock route 关停顺序
+5. **M-13 HK 前端节点选型**(Vercel HK / 阿里云 HK / Cloudflare)— Stage 4 启动前定型即可,1-3 天 lead time
+6. **补写 `docs/milestones/M3-admin-pages.md` 占位**(1h)— 业务方临时插队 M3 时不至于挂空文件
 
 ### 暂不启动(原因)
 
-- ❌ **Stage 4** — 12 项物料**全 ⚪**;路由可以写,OSS / SMS / Azure 接入只能 `NotImplementedError`,与 Stage 3 同步推进收益不抵复杂度
-- ❌ **M3 Admin Pages** — 业务 ROI 是"路演价值"而非"后端真数据",优先级低于 Stage 3;且 milestone 文件未建
+- ❌ **Stage 4** — 12 项物料**仍全 ⚪**,且 §2.5 / §2.6 未拍板;现在写路由 stub 会浪费 30~40% 返工
+- ❌ **M3 Admin Pages** — 业务 ROI 是"路演价值"而非"后端真数据",优先级低于 Stage 4 启动闸口;且 milestone 文件未建
+
+### 工程侧若仍需推进(选填,低优)
+
+可考虑的"不阻塞、不返工"小项:
+
+- 把 27 Stage 3 测试中的 inline `_make_internal_full()` 工厂转成 `tests/factories/` 抽象(Stage 4 写 service 测试时收益更大)
+- 给 `app/schemas/__init__.py` 加 docstring 总览导出树
+- 在 `backend/README.md` 加 Stage 3 章节(crop_report_for_user 用法 + 8 条红线对照表)
 
 讨论决策日志详见 [discussions/M4-backend-rollout-tracker.md](./discussions/M4-backend-rollout-tracker.md)。
 

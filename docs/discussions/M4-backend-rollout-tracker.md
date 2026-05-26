@@ -1,7 +1,7 @@
 # M4 后端铺设 — 讨论进度跟踪
 
 > 临时讨论区。用来跟踪**已有结论**与**尚未讨论**的部分,避免重复对齐。
-> 起始:2026-05-22 / 最后更新:2026-05-24
+> 起始:2026-05-22 / 最后更新:2026-05-26(Stage 3 落地)
 > 父文档:[Backend-Architecture_v0.1.md](../Backend-Architecture_v0.1.md)、[roadmap.md](../roadmap.md)、[milestones/M4-real-backend.md](../milestones/M4-real-backend.md)
 
 ---
@@ -26,10 +26,14 @@
 
 ### 1.2 跨云部署拓扑(Backend-Architecture §16.1 / §9.7)
 
-- **主体业务后端**:阿里云(ECS + RDS + Tair/Redis + OSS + OCR + 短信)
+- **前端(Next.js)**:**HK 节点**(2026-05-26 决议;Vercel HK / 阿里云 HK / Cloudflare,Stage 4 前定型)
+- **主体业务后端**:阿里云华东(ECS + RDS + Tair/Redis + OSS + OCR + 短信)
 - **AI**:Azure OpenAI Service @ HongKong,后端跨云**公网直连**
 - M4 **不**引入 API Gateway / VPN 专线;`timeout=60s` + `tenacity` 重试 + `ai_call_logs.latency_ms` 兜底
-- 排除项(不要回推):OpenAI 平台直连 / 把后端整体搬到 Azure / 国内 LLM 备份
+- **前端 → 后端跨境**:80-150ms 公网 RTT,MVP 可接受;Stage 4 前端调后端用绝对 URL + CORS 白名单;cookie SameSite=None+Secure
+- 排除项(不要回推):OpenAI 平台直连 / 把后端整体搬到 Azure / 国内 LLM 备份 / 前端境内服务器(ICP 备案路线已废弃)
+
+**2026-05-26 决议**:网站前端部署 HK 节点 → 工信部 ICP 备案不再需要(ICP 只针对接入境内服务器的网站);原 M-04 关键路径直接消除,详见 [M-13 HK 前端节点](./M4-materials-acquisition-workpack.md#m-13-hk-前端节点选型--域名-dns-接管新增-2026-05-26替代-m-04)。
 
 ### 1.3 §17 后续文档进度(5/6)
 
@@ -50,7 +54,7 @@
 |---|---|---|---|
 | **Stage 1: Foundation** | FastAPI 骨架 + `/health(self)` + envelope / request-id 中间件 + Settings + structlog + Dockerfile + pytest 骨架(10 用例) | 🟢 完成 | 2026-05-24 |
 | **Stage 2: Persistence** | 13 张 ORM + Alembic 初始迁移(扩展 + 13 表 + CHECK + 索引 + 触发器 + pgvector 列)+ testcontainers fixture(per-test SAVEPOINT)+ `/health` 扩 `checks.db` | 🟢 完成 | 2026-05-24 |
-| **Stage 3: Tier Schemas** | 7 个 tier Pydantic schema + 服务端字段裁剪覆盖详情/客户简洁版 | ⚪ 未启动 | — |
+| **Stage 3: Tier Schemas** | 5 tier slot + 2 独立 schema(ReportAdmin/ReportCustomerBrief)+ CaseReport envelope + InternalReport + `crop_report_for_user` 唯一裁剪入口 + 8 条 RBAC 红线锁定(54 测试全绿) | 🟢 完成 | 2026-05-26 |
 | **Stage 4: API + Integrations** | auth/cases/reports/files/ocr/memberships 路由 + JWT + RBAC + `LLMClient` + OSS/OCR/短信 client | ⚪ 未启动 | — |
 
 **Stage 1 落地附带的工程约定**(本会话引入,跨会话生效):
@@ -68,11 +72,20 @@
 - **testcontainers 用 `pgvector/pgvector:pg16`**(D3),自带 TCP 探活(`_wait_for_pg_ready`,不依赖 psycopg2);per-test SAVEPOINT 隔离(`join_transaction_mode="create_savepoint"`),不每用例 DROP/CREATE schema。
 - **`/health.db` 失败不返 503**(D5):HTTP 仍 200,只在 `data.status="degraded"` + `data.checks.db="unavailable"` 标记;K8s liveness 看 HTTP code,readiness 才看 status。
 
+**Stage 3 落地附带的工程约定**(本会话引入,跨会话生效):
+
+- **`ReportAdmin` 独立 export,**不进** `CaseReport` envelope**:即便 `/api/reports/:id` 路由未来漏掉 `crop_report_for_user`,envelope 中也不会出现 `admin: null` 字段(暴露"有 admin 字段"本身就是泄漏);Stage 4 admin 路由必须显式 `build_admin_view(internal)` 才能拿到 adminNote。
+- **`TIER_ORDER: Final[Mapping[ReportAudience, int]]`**:tier 排序用数字而非字符串比较(`"business_pro" < "free"` 字符串顺序反了);`_can_view(audience, "pro")` 这种业务语义封装比裸 `TIER_ORDER[audience] >= 2` 更可读。Stage 4 加新 tier(微信会员等)只改本 dict 一处。
+- **"全字段齐才下发整 slot"语义**:若 `InternalReport` 中某 tier 字段部分缺失(e.g. `recycle_price=None` 但 `full_risk=["x"]`),整 `ReportPro` slot 返回 `None`,前端逻辑只判 slot 是否 null,不必逐字段判空。Stage 4 AI 模板 prompt 必须按此口径输出。
+- **入口宽容、出口严格**:`InternalReport` `extra="ignore"`(AI 升级新字段不让历史报告反序列化炸开);所有 5 tier slot `extra="forbid"`(物理拒绝越权字段)。Stage 4 加新 schema 必须沿用本分层。
+- **`schemas/__init__.py` 显式 re-export 模式**:项目 mypy `no_implicit_reexport=True`,必须 `from x import Y as Y` + `__all__` 双重声明 —— Stage 4 加新 schema 沿用本模式。
+- **测试用 inline `_make_internal_full()` 而非 conftest fixture / polyfactory**:Stage 3 拍板"测试自包含 > 抽象工厂",reader 在单文件内能看清"测试输入长什么样";Stage 4 写 service 测试时再补抽象。
+
 下一步候选(等业务方拍板):
 
-- **Stage 3 启动**(7 tier Pydantic schema + `cropReportForUser` 服务端裁剪)— 工程方独立可推,推荐
-- **等物料解锁后跨 Stage 推进** — 见 §2.4
-- **回头铺 M3**
+- 🔴 **Stage 4 启动前必须拍板** §2.5(AI 工程接手时机)+ §2.6(双写期灰度策略),否则 Stage 4 路由代码会因为 LLMClient stub 深度决策导致 30~40% 返工
+- 🟡 **物料并行解锁** — M-04 ICP 备案本周不启动则 Stage 4 写完后空等 2-3 周(见 §2.4)
+- ⚪ **回头铺 M3** — 业务方需要"全功能演示"路演才启动
 
 ---
 
@@ -107,8 +120,8 @@
 
 - [ ] M-01 阿里云主账号 access(项目方负责人)
 - [ ] M-02 工程师子账号 + RAM 策略(ops)
-- [ ] M-03 Azure 订阅 + OpenAI 资源 ownership(项目方 + AI 工程接口人)
-- [ ] M-04 域名 + ICP 备案 ⚠️ **关键路径最长 7-20 天**(负责人 + 法务)
+- [ ] M-03 Azure 订阅 + OpenAI 资源 ownership ⚠️ **新关键路径最长 7-14 天**(项目方 + AI 工程接口人)
+- ~~[ ] M-04 域名 + ICP 备案~~ 🚫 **已废弃 2026-05-26** — 决议改 HK 前端节点(M-13),工信部 ICP 不再需要
 - [ ] M-05 阿里云短信签名审核(ops)
 - [ ] M-06 短信模板审核(ops)
 - [ ] M-07 OSS Bucket 创建(ops + tech lead)
@@ -117,6 +130,7 @@
 - [ ] M-10 真实玉石 / 珠宝样本 — 滚动收集,不卡上线但卡 AI 评测
 - [ ] M-11 监控告警通道(ops)
 - [ ] M-12 跳板机 SSH 公钥白名单(tech lead)
+- [ ] **M-13 HK 前端节点选型 + 域名 DNS 接管**(新增 2026-05-26,替代 M-04;项目方 + tech lead;1-3 天)
 
 ### 2.5 AI 工程那一脚的接手时机
 
