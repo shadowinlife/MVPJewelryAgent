@@ -1,7 +1,7 @@
 # M4 后端铺设 — 讨论进度跟踪
 
 > 临时讨论区。用来跟踪**已有结论**与**尚未讨论**的部分,避免重复对齐。
-> 起始:2026-05-22 / 最后更新:2026-05-26(Stage 3 落地)
+> 起始:2026-05-22 / 最后更新:2026-06-01(Stage 4 LLM 子系统落地 + DashScope 连通验证)
 > 父文档:[Backend-Architecture_v0.1.md](../Backend-Architecture_v0.1.md)、[roadmap.md](../roadmap.md)、[milestones/M4-real-backend.md](../milestones/M4-real-backend.md)
 
 ---
@@ -17,8 +17,8 @@
 | 2 | 微信登录 | ✅ 推 P1;M4 只做手机号 + 邮箱 + 密码 |
 | 3 | OSS 上传通道 | ✅ 阿里云 OSS + STS 直传(文件不过后端) |
 | 4 | 短信服务商 | ✅ 阿里云短信 |
-| 5 | LLM 提供方 | ✅ **Azure OpenAI Service @ HongKong**(唯一);排除豆包 / 通义千问 |
-| 5a | M4 AI 落地深度 | ✅ 只预留 `LLMClient` 抽象接口 + prompt/schema/配额脚手架;真接入由 AI 工程那一脚承接 |
+| 5 | LLM 提供方 | ✅ **prod: Azure OpenAI @ HK**;**dev/staging: DashScope qwen3.7-max**(2026-06-01 确认连通) |
+| 5a | M4 AI 落地深度 | ✅ `LLMClient` Protocol 已实现 + DashScope/Azure 双 adapter + admin 配置页动态切换;DashScope 作为开发默认不再 stub |
 | 6 | RAG / pgvector | ✅ M4 装扩展 + 写入 embedding,**召回开关默认关** |
 | 7 | i18n 错误码 | ✅ 推 P1(本期 `error` 用中文短句) |
 | 8 | Postgres | ✅ 阿里云 RDS PostgreSQL 16(原生 pgvector) |
@@ -55,7 +55,22 @@
 | **Stage 1: Foundation** | FastAPI 骨架 + `/health(self)` + envelope / request-id 中间件 + Settings + structlog + Dockerfile + pytest 骨架(10 用例) | 🟢 完成 | 2026-05-24 |
 | **Stage 2: Persistence** | 13 张 ORM + Alembic 初始迁移(扩展 + 13 表 + CHECK + 索引 + 触发器 + pgvector 列)+ testcontainers fixture(per-test SAVEPOINT)+ `/health` 扩 `checks.db` | 🟢 完成 | 2026-05-24 |
 | **Stage 3: Tier Schemas** | 5 tier slot + 2 独立 schema(ReportAdmin/ReportCustomerBrief)+ CaseReport envelope + InternalReport + `crop_report_for_user` 唯一裁剪入口 + 8 条 RBAC 红线锁定(54 测试全绿) | 🟢 完成 | 2026-05-26 |
-| **Stage 4: API + Integrations** | auth/cases/reports/files/ocr/memberships 路由 + JWT + RBAC + `LLMClient` + OSS/OCR/短信 client | ⚪ 未启动 | — |
+| **Stage 4: API + Integrations** | auth/cases/reports/files/ocr/memberships 路由 + JWT + RBAC + `LLMClient` + OSS/OCR/短信 client | 🟡 进行中 | — |
+
+**Stage 4 子进度**(2026-06-01 更新):
+
+| 子系统 | 状态 | 说明 |
+|---|---|---|
+| LLMClient 多 Provider 抽象 | 🟢 完成 | Protocol + DashScope adapter + Azure adapter + Fernet 加密 + factory |
+| Admin 配置页(后端 API + 前端 UI) | 🟢 完成 | GET/PUT /admin/llm-config + POST test + 前端 form |
+| DashScope 连通验证 | 🟢 完成 | qwen3.7-max 端到端 OK(多模态,支持图片) |
+| Alembic 0002 (llm_provider_configs) | 🟢 完成 | 单行配置表 + CHECK 约束 |
+| Auth(JWT + 登录/注册) | ⚪ 未启动 | — |
+| Cases/Reports CRUD 路由 | ⚪ 未启动 | — |
+| OSS 直传(STS 预签名) | ⚪ 未启动 | 需 M-07 |
+| OCR client | ⚪ 未启动 | — |
+| 短信 client | ⚪ 未启动 | 需 M-05/M-06 |
+| AI 鉴定/估价业务链路 | ⚪ 未启动 | LLMClient 已就绪,待 prompt 编排 |
 
 **Stage 1 落地附带的工程约定**(本会话引入,跨会话生效):
 
@@ -81,11 +96,12 @@
 - **`schemas/__init__.py` 显式 re-export 模式**:项目 mypy `no_implicit_reexport=True`,必须 `from x import Y as Y` + `__all__` 双重声明 —— Stage 4 加新 schema 沿用本模式。
 - **测试用 inline `_make_internal_full()` 而非 conftest fixture / polyfactory**:Stage 3 拍板"测试自包含 > 抽象工厂",reader 在单文件内能看清"测试输入长什么样";Stage 4 写 service 测试时再补抽象。
 
-下一步候选(等业务方拍板):
+下一步候选(2026-06-01 更新):
 
-- 🔴 **Stage 4 启动前必须拍板** §2.5(AI 工程接手时机)+ §2.6(双写期灰度策略),否则 Stage 4 路由代码会因为 LLMClient stub 深度决策导致 30~40% 返工
-- 🟡 **物料并行解锁** — M-04 ICP 备案本周不启动则 Stage 4 写完后空等 2-3 周(见 §2.4)
-- ⚪ **回头铺 M3** — 业务方需要"全功能演示"路演才启动
+- ✅ **§2.5 事实上已 bypass** — LLMClient 不再是 stub,DashScope 已真接入;"AI 工程接手时机"的顾虑不再阻塞 Stage 4 路由编写
+- 🟡 **§2.6 前端双写期灰度策略**仍未拍板 — 但不阻塞后端路由开发,只影响前端切换顺序
+- 🟢 **推荐下一步**:Auth(JWT 登录/注册)→ Cases/Files CRUD → AI 鉴定业务链路(图片 + prompt → 报告)
+- 🟡 **物料并行** — M-01 ✅ 已完成;M-03 Azure 准入仍在等(但 DashScope 已可完全替代 dev);M-05/M-06/M-07/M-09 待推动
 
 ---
 
@@ -118,7 +134,7 @@
 
 🟡 **2026-05-23 已展开为工作包**:[M4-materials-acquisition-workpack.md](./M4-materials-acquisition-workpack.md)(12 项执行卡 + 关键路径 + RAM/KMS/ICP/短信模板)。每周一同步状态;阻塞抬到本节。
 
-- [ ] M-01 阿里云主账号 access(项目方负责人)
+- [x] M-01 阿里云主账号 access(项目方负责人)✅ 2026-06-01 完成
 - [ ] M-02 工程师子账号 + RAM 策略(ops)
 - [ ] M-03 Azure 订阅 + OpenAI 资源 ownership ⚠️ **新关键路径最长 7-14 天**(项目方 + AI 工程接口人)
 - ~~[ ] M-04 域名 + ICP 备案~~ 🚫 **已废弃 2026-05-26** — 决议改 HK 前端节点(M-13),工信部 ICP 不再需要
