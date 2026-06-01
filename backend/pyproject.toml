@@ -21,6 +21,9 @@ dependencies = [
     # Stage 4: LLM integration (DashScope 兼容 + Azure OpenAI).
     "openai>=1.40,<2.0",
     "cryptography>=43.0,<44.0",
+    # Stage 4: Auth (JWT + password hashing).
+    "pyjwt>=2.8,<3.0",
+    "bcrypt>=4.0,<6.0",
 ]
 
 [dependency-groups]
@@ -74,7 +77,7 @@ no_implicit_reexport = true
 exclude = ["alembic/versions/", "tests/"]
 
 [[tool.mypy.overrides]]
-module = ["structlog.*", "pgvector.*", "testcontainers.*", "openai.*", "cryptography.*", "respx.*"]
+module = ["structlog.*", "pgvector.*", "testcontainers.*", "openai.*", "cryptography.*", "respx.*", "jwt.*", "bcrypt.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
@@ -83,7 +86,10 @@ testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 filterwarnings = [
     "error",
-    "ignore::DeprecationWarning:passlib.*",
+    "ignore::DeprecationWarning:bcrypt.*",
+    # FastAPI 0.115 + Pydantic 2.9 内部 TypeAdapter 处理 alias_generator 时会触发
+    # UnsupportedFieldAttributeWarning,实际 alias 功能正常;属 FastAPI 兼容层 bug。
+    "ignore::pydantic.warnings.UnsupportedFieldAttributeWarning",
     # docker-py 在 colima socket 上偶发未关闭 socket 的 ResourceWarning,
     # 与被测代码无关 —— 静默,避免噪音掩盖真问题
     "ignore::ResourceWarning:docker.*",

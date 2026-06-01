@@ -75,6 +75,10 @@ class Settings(BaseSettings):
     # === Stage 4: JWT ===
     # JWT 签名密钥;production 走 KMS 注入,禁止裸写默认值。
     jwt_secret: str = ""
+    # access_token 有效期(分钟);30 min 为业界 SPA 常见值。
+    jwt_access_expire_minutes: int = Field(default=30, ge=1, le=1440)
+    # refresh_token 有效期(天);7 天 = 用户一周内不必重新登录。
+    jwt_refresh_expire_days: int = Field(default=7, ge=1, le=90)
 
     # === Stage 4: LLM 配置加密 ===
     # Fernet 对称加密密钥(base64 URL-safe 格式);用于加密存入 DB 的 LLM API Key。

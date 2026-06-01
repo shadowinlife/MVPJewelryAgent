@@ -68,6 +68,10 @@ class User(Base, IdMixin, TimestampMixin, MockableMixin):
         server_default="active",
     )
 
+    # 密码哈希(bcrypt);MVP 阶段使用账密登录,短信登录上线后此字段仍保留(可选双因子)。
+    # nullable=True 因为未来 SMS-only 注册的用户不设密码。
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     # 最近登录时间(用于风控 / 不活跃账号清理)
     last_login_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True

@@ -9,6 +9,21 @@
   在用、能不能删。
 """
 
+from app.schemas.auth import (
+    LoginRequest as LoginRequest,
+)
+from app.schemas.auth import (
+    RefreshRequest as RefreshRequest,
+)
+from app.schemas.auth import (
+    RegisterRequest as RegisterRequest,
+)
+from app.schemas.auth import (
+    TokenResponse as TokenResponse,
+)
+from app.schemas.auth import (
+    UserRead as UserRead,
+)
 from app.schemas.envelope import (
     ApiResponse as ApiResponse,
 )
@@ -72,6 +87,11 @@ __all__ = [
     "LLMConfigTestResult",
     "LLMConfigUpdate",
     "LLMProvider",
+    "LoginRequest",
+    "RefreshRequest",
+    "RegisterRequest",
+    "TokenResponse",
+    "UserRead",
     "InternalCustomerBrief",
     "InternalReport",
     "MembershipTier",

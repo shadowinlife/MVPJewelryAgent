@@ -16,6 +16,12 @@ Stage 3 只产出 `report_service`;Stage 4 再加 `case_service` / `file_service
 等(各路由对应一个 service 模块)。
 """
 
+from app.services.auth_service import (
+    authenticate_user,
+    issue_tokens,
+    refresh_tokens,
+    register_user,
+)
 from app.services.report_service import (
     TIER_ORDER,
     build_admin_view,
@@ -25,7 +31,11 @@ from app.services.report_service import (
 
 __all__ = [
     "TIER_ORDER",
+    "authenticate_user",
     "build_admin_view",
     "build_customer_brief",
     "crop_report_for_user",
+    "issue_tokens",
+    "refresh_tokens",
+    "register_user",
 ]

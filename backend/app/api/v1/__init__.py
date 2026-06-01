@@ -10,10 +10,11 @@
 
 from fastapi import APIRouter
 
-from app.api.v1 import health
+from app.api.v1 import auth, health
 from app.api.v1.admin import admin_router
 
 # 主聚合路由;每加一个子模块就在这里 include 一次。
 api_router = APIRouter()
 api_router.include_router(health.router)
+api_router.include_router(auth.router)
 api_router.include_router(admin_router)
