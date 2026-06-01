@@ -1,0 +1,8 @@
+{
+  "provider": "dashscope",
+  "apiKeyMasked": "****demo",
+  "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "modelName": "qwen-max",
+  "isActive": true,
+  "updatedAt": "2026-06-01T10:00:00Z"
+}

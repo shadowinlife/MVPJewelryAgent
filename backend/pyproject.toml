@@ -18,6 +18,9 @@ dependencies = [
     "asyncpg>=0.30,<0.31",
     "alembic>=1.14,<2.0",
     "pgvector>=0.3.6,<0.4",
+    # Stage 4: LLM integration (DashScope 兼容 + Azure OpenAI).
+    "openai>=1.40,<2.0",
+    "cryptography>=43.0,<44.0",
 ]
 
 [dependency-groups]
@@ -29,6 +32,8 @@ dev = [
     "mypy>=1.13,<2.0",
     # Stage 2: real-Postgres integration tests; pulls Docker via docker-py.
     "testcontainers[postgres]>=4.8,<5.0",
+    # Stage 4: mock HTTP for LLM adapter tests.
+    "respx>=0.21,<0.22",
 ]
 
 [tool.uv]
@@ -50,6 +55,7 @@ select = [
 ]
 ignore = [
     "E501",                                # line-length handled by formatter
+    "B008",                                # FastAPI Depends() in function defaults is the standard pattern
     "RUF001", "RUF002", "RUF003",          # 中文文档/注释里 × ÷ → ≥ 等数学符号是刻意的(AGENT.md 注释即文档)
 ]
 
@@ -68,7 +74,7 @@ no_implicit_reexport = true
 exclude = ["alembic/versions/", "tests/"]
 
 [[tool.mypy.overrides]]
-module = ["structlog.*", "pgvector.*", "testcontainers.*"]
+module = ["structlog.*", "pgvector.*", "testcontainers.*", "openai.*", "cryptography.*", "respx.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

@@ -72,6 +72,24 @@ class Settings(BaseSettings):
     # 2 秒经验值:本地 LAN 内 SELECT 1 应 < 100ms,跨 AZ 也应 < 500ms,2s 留充足余量。
     health_db_timeout_seconds: float = Field(default=2.0, gt=0.0, le=30.0)
 
+    # === Stage 4: JWT ===
+    # JWT 签名密钥;production 走 KMS 注入,禁止裸写默认值。
+    jwt_secret: str = ""
+
+    # === Stage 4: LLM 配置加密 ===
+    # Fernet 对称加密密钥(base64 URL-safe 格式);用于加密存入 DB 的 LLM API Key。
+    # 生成: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    # 缺省时从 jwt_secret 派生(仅 local 开发用,production 必须独立配置)。
+    llm_config_encryption_key: str = ""
+
+    # === Stage 4: DashScope 降级 env vars(DB 无配置时 fallback)===
+    # DashScope API Key;DB 有配置时忽略本字段。
+    dashscope_api_key: str = ""
+    # DashScope 兼容接口端点
+    dashscope_endpoint: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    # DashScope 默认模型名
+    dashscope_model: str = "qwen3.7-max"
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

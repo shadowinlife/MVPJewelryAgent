@@ -15,6 +15,18 @@ from app.schemas.envelope import (
 from app.schemas.envelope import (
     DataSource as DataSource,
 )
+from app.schemas.llm_config import (
+    LLMConfigRead as LLMConfigRead,
+)
+from app.schemas.llm_config import (
+    LLMConfigTestResult as LLMConfigTestResult,
+)
+from app.schemas.llm_config import (
+    LLMConfigUpdate as LLMConfigUpdate,
+)
+from app.schemas.llm_config import (
+    LLMProvider as LLMProvider,
+)
 from app.schemas.report import (
     CaseReport as CaseReport,
 )
@@ -56,6 +68,10 @@ __all__ = [
     "ApiResponse",
     "CaseReport",
     "DataSource",
+    "LLMConfigRead",
+    "LLMConfigTestResult",
+    "LLMConfigUpdate",
+    "LLMProvider",
     "InternalCustomerBrief",
     "InternalReport",
     "MembershipTier",

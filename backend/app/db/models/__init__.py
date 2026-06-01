@@ -19,6 +19,7 @@ from app.db.models.case import Case
 from app.db.models.case_file import CaseFile
 from app.db.models.import_job import ImportJob
 from app.db.models.knowledge_file import KnowledgeFile
+from app.db.models.llm_provider_config import LLMProviderConfig
 from app.db.models.membership import Membership
 from app.db.models.ocr_result import OcrResult
 from app.db.models.sms_code import SmsCode
@@ -34,6 +35,7 @@ __all__ = [
     "CaseFile",
     "ImportJob",
     "KnowledgeFile",
+    "LLMProviderConfig",
     "Membership",
     "OcrResult",
     "SmsCode",
